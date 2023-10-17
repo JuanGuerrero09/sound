@@ -1,58 +1,39 @@
 package main
 
 import (
-	"fmt"
-	// "encoding/csv"
-	// "log"
-	// "os"
-	// "sound/pkg"
+ "fmt"
+ "log"
+ "strings"
 
-	"github.com/gocolly/colly"
+ "github.com/gocolly/colly/v2"
 )
 
 func main() {
-	// pkg.Scraper()
-	// fmt.Println("Hola mundo")
-	// fName := "data.csv"
-	// file, err := os.Create(fName)
-	// if err != nil {
-	// 	log.Fatalf("could not create te file, err: %q", err)
-	// }
-	// defer file.Close()
+ // Create a new Colly collector
+ c := colly.NewCollector()
 
-	// writer := csv.NewWriter(file)
-	// defer writer.Flush()
+ // Define the URL you want to scrape
+ url := "http://quotes.toscrape.com/page/1/"
 
-	// c := colly.NewCollector(
-	// 	colly.AllowedDomains("http://quotes.toscrape.com"),
-	// )
+ // Set up callbacks to handle scraping events
+ c.OnHTML(".quote", func(e *colly.HTMLElement) {
+  // Extract data from HTML elements
+  quote := e.ChildText("span.text")
+  author := e.ChildText("small.author")
+  tags := e.ChildText("div.tags")
 
-	// c.OnRequest(func(r *colly.Request) {
-	// 	 r.Headers.Set("User-Agent")
-	// 	fmt.Println("Visiting: ", r.URL)
-	// })
+  // Clean up the extracted data
+  quote = strings.TrimSpace(quote)
+  author = strings.TrimSpace(author)
+  tags = strings.TrimSpace(tags)
 
-	// c.OnResponse(func(r *colly.Response) {
-	// 	fmt.Println("Response code: ", r.StatusCode)
-	// })
+  // Print the scraped data
+  fmt.Printf("Quote: %s\nAuthor: %s\nTags: %s\n\n", quote, author, tags)
+ })
 
-	// c.OnError(func(r *colly.Response, err error) {
-	// 	fmt.Println("error", err.Error())
-	// })
-
-	
-	c := colly.NewCollector()
-	
-	// Find and visit all links
-	c.OnHTML(".text", func(e *colly.HTMLElement) {
-		fmt.Println(e)
-	})
-	
-	c.OnHTML(".author", func(h *colly.HTMLElement) {
-		fmt.Println("Author: ", h.Text)
-	})
-	c.Visit("https://es.aliexpress.com/item/1005005816349636.html")
-
-
-
+ // Visit the URL and start scraping
+ err := c.Visit(url)
+ if err != nil {
+  log.Fatal(err)
+ }
 }
